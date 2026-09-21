@@ -171,27 +171,6 @@ export const domains: Domain[] = [
       tags: ["Numeric", "Utility", "Short links", "Directory"],
     },
   },
-  {
-    slug: "281761",
-    host: "281761.com",
-    label: "281761",
-    tld: "com",
-    length: 6,
-    category: "Numeric",
-    status: "available",
-    zh: {
-      tagline: "六位纯数字，读起来顺口",
-      intro:
-        "与另一枚数字域名成对，六位纯数字，读起来顺口。适合电话类服务、号码资源、查询工具或短链项目，也适合作为一个易记的入口域名。",
-      tags: ["纯数字", "号码资源", "查询工具", "短链"],
-    },
-    en: {
-      tagline: "Six digits that roll off the tongue",
-      intro:
-        "A pair to the other numeric name here. Six digits, easy to say out loud. Fits phone-based services, number resources, lookup tools, or short-link projects \u2014 a memorable entry point.",
-      tags: ["Numeric", "Numbers", "Utility", "Short links"],
-    },
-  },
 ];
 
 export const hosts = domains.map((d) => d.host);

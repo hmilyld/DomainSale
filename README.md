@@ -41,7 +41,7 @@ Node 版本见 `.nvmrc`（24 LTS）。Astro 7 要求 `>=22.12.0`，且不支持�
 
 ```sh
 # /etc/hosts
-127.0.0.1 javaing.com gridelec.com whylover.com zchat.cc zelda8.com 342263.com 281761.com
+127.0.0.1 javaing.com gridelec.com whylover.com zchat.cc zelda8.com 342263.com
 ```
 
 然后访问 `http://javaing.com:4321/`。
