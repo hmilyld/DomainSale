@@ -1,0 +1,84 @@
+---
+import { formatPrice, site, t } from "../data/site";
+import { displayHost, displayTld, domains, type Domain } from "../data/domains";
+import DomainName from "./DomainName.astro";
+import T from "./T.astro";
+
+interface Props {
+  domain?: Domain | null;
+}
+
+const { domain = null } = Astro.props;
+
+const key = domain ? domain.host : "default";
+const tagline = domain ? { zh: domain.zh.tagline, en: domain.en.tagline } : t.defaultTagline;
+const intro = domain ? { zh: domain.zh.intro, en: domain.en.intro } : t.defaultIntro;
+const price = domain?.price ? formatPrice(domain.price) : null;
+
+const subject = domain ? `Domain inquiry: ${displayHost(domain)}` : "Domain inquiry";
+const body = domain
+  ? `Hi,\n\nI am interested in ${displayHost(domain)}.\n\nMy budget: \n`
+  : `Hi,\n\nI am interested in one of your domains:\n\n`;
+const mailto = `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+---
+
+<section class="ds-spotlight" data-spotlight={key} aria-labelledby={`spotlight-${key}`}>
+  <div class="ds-wrap ds-spotlight__inner">
+    <h1 id={`spotlight-${key}`} class:list={["ds-spotlight__title", { "ds-spotlight__title--headline": !domain }]}>
+      {
+        domain ? (
+          <DomainName label={domain.label} tld={domain.tld} variant="display" />
+        ) : (
+          <T zh="在售域名" en="Domains for sale" />
+        )
+      }
+    </h1>
+
+    <p class="ds-tagline"><T zh={tagline.zh} en={tagline.en} /></p>
+    <p class="ds-intro"><T zh={intro.zh} en={intro.en} /></p>
+
+    <ul class="ds-chips" role="list">
+      <li class="ds-chip ds-chip--status">
+        <span class="ds-dot" aria-hidden="true"></span>
+        {
+          domain ? (
+            <T
+              zh={domain.status === "sold" ? t.sold.zh : t.available.zh}
+              en={domain.status === "sold" ? t.sold.en : t.available.en}
+            />
+          ) : (
+            <T zh="全部可转让" en="All available" />
+          )
+        }
+      </li>
+
+      {
+        price && domain?.price ? (
+          <li class="ds-chip ds-chip--price">{price}</li>
+        ) : domain ? (
+          <li class="ds-chip"><T zh={t.onRequest.zh} en={t.onRequest.en} /></li>
+        ) : (
+          <li class="ds-chip"><T zh={`${domains.length} 个域名`} en={`${domains.length} domains`} /></li>
+        )
+      }
+
+      {
+        domain && (
+          <>
+            <li class="ds-chip">.{displayTld(domain.tld)}</li>
+            <li class="ds-chip">
+              <T zh={`${domain.length} 个字符`} en={`${domain.length} characters`} />
+            </li>
+          </>
+        )
+      }
+    </ul>
+
+    <div class="ds-actions">
+      <a class="ds-btn ds-btn--primary" href={mailto}><T zh={t.buy.zh} en={t.buy.en} /></a>
+      <a class="ds-btn ds-btn--ghost" href={domain ? "#other-domains" : "#buy"}>
+        <T zh={t.seeOthers.zh} en={t.seeOthers.en} />
+      </a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,33 @@
+---
+import { domains } from "../data/domains";
+import { formatPrice, t } from "../data/site";
+import DomainName from "./DomainName.astro";
+import T from "./T.astro";
+
+const count = domains.length;
+---
+
+<section id="other-domains" class="ds-section" aria-labelledby="other-domains-title">
+  <div class="ds-wrap">
+    <div class="ds-section__head">
+      <h2 id="other-domains-title" class="ds-section__title"><T zh={t.others.zh} en={t.others.en} /></h2>
+      <p class="ds-section__meta"><T zh={`共 ${count} 个`} en={`${count} total`} /></p>
+    </div>
+
+    <ul class="ds-list" role="list">
+      {
+        domains.map((domain) => (
+          <li class="ds-row" data-row={domain.host}>
+            <DomainName label={domain.label} tld={domain.tld} variant="row" />
+            <span class="ds-row__tagline">
+              <T zh={domain.zh.tagline} en={domain.en.tagline} />
+            </span>
+            <span class="ds-row__meta">
+              {domain.price ? formatPrice(domain.price) : <T zh={t.onRequest.zh} en={t.onRequest.en} />}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

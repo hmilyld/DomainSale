@@ -1,0 +1,285 @@
+---
+import "../styles/global.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
+import "@fontsource/jetbrains-mono/700.css";
+import { displayHost, domains, fallbackHost } from "../data/domains";
+import { site, uiStrings } from "../data/site";
+import TopBar from "../components/TopBar.astro";
+import Footer from "../components/Footer.astro";
+import T from "../components/T.astro";
+
+const hosts = domains.map((domain) => domain.host);
+
+const hostTitles: Record<string, Record<string, string>> = {};
+for (const domain of domains) {
+  const name = displayHost(domain);
+  hostTitles[domain.host] = {
+    zh: `${name} 在售`,
+    en: `${name} is for sale`,
+    zhDesc: `${name} 正在出售：${domain.zh.tagline}。价格可议，欢迎联系。`,
+    enDesc: `${name} is for sale: ${domain.en.tagline}. Price is negotiable — get in touch.`,
+  };
+}
+
+const wechatId = site.wechatId;
+---
+
+<!doctype html>
+<html lang="zh-CN" data-host={fallbackHost} data-lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>域名出售 · Domains for sale</title>
+    <meta name="description" content="价格可议的域名出售：Javaing.COM、Gridelec.COM、Whylover.COM、Zchat.CC、Zelda8.COM、342263.COM、281761.COM。" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1015" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-title" content="域名出售" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="域名出售" />
+    <meta property="og:title" content="域名出售 · Domains for sale" />
+    <meta property="og:description" content="一组在售域名，价格可议。" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="域名出售 · Domains for sale" />
+    <meta name="twitter:description" content="一组在售域名，价格可议。" />
+
+    <script is:inline define:vars={{ hosts, fallbackHost, hostTitles, uiStrings }}>
+      (function () {
+        var d = document.documentElement;
+
+        // keeps search/social metadata in sync with the arrival host and language
+        window.__dsShareMeta = function (title, description, lang) {
+          function set(selector, value) {
+            var el = document.querySelector(selector);
+            if (el) el.setAttribute("content", value);
+          }
+          set('meta[name="description"]', description);
+          set('meta[property="og:title"]', title);
+          set('meta[property="og:description"]', description);
+          set('meta[name="twitter:title"]', title);
+          set('meta[name="twitter:description"]', description);
+          set('meta[property="og:locale"]', lang === "zh" ? "zh_CN" : "en_US");
+          set('meta[property="og:locale:alternate"]', lang === "zh" ? "en_US" : "zh_CN");
+
+          var ogUrl = document.querySelector('meta[property="og:url"]');
+          if (!ogUrl) {
+            ogUrl = document.createElement("meta");
+            ogUrl.setAttribute("property", "og:url");
+            document.head.appendChild(ogUrl);
+          }
+          ogUrl.setAttribute("content", location.origin + "/");
+        };
+
+        // arrival host: an unknown host (e.g. IP access) falls back to the first domain
+        var raw = (location.hostname || "").toLowerCase().replace(/^www\./, "");
+        var host = hosts.indexOf(raw) !== -1 ? raw : fallbackHost;
+        d.setAttribute("data-host", host);
+
+        // theme: stored preference wins, "system" follows the OS
+        var pref = "system";
+        try {
+          var stored = localStorage.getItem("theme");
+          if (stored === "light" || stored === "dark" || stored === "system") pref = stored;
+        } catch (e) {}
+        var systemDark =
+          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        d.setAttribute("data-theme-mode", pref);
+        d.setAttribute("data-theme", pref === "system" ? (systemDark ? "dark" : "light") : pref);
+
+        // language: a Chinese browser gets Chinese, everything else gets English
+        var lang = null;
+        try {
+          lang = localStorage.getItem("lang");
+        } catch (e) {}
+        if (lang !== "zh" && lang !== "en") {
+          var list =
+            navigator.languages && navigator.languages.length
+              ? navigator.languages
+              : [navigator.language || "en"];
+          lang = "en";
+          for (var i = 0; i < list.length; i++) {
+            var value = (list[i] || "").toLowerCase();
+            if (value.indexOf("zh") === 0) {
+              lang = "zh";
+              break;
+            }
+            if (value.indexOf("en") === 0) {
+              break;
+            }
+          }
+        }
+        d.setAttribute("data-lang", lang);
+        d.setAttribute("lang", lang === "zh" ? "zh-CN" : "en");
+
+        var meta = hostTitles[host];
+        var L = uiStrings[lang];
+        var title = meta ? meta[lang] : L.defaultTitle;
+        var description = meta ? meta[lang + "Desc"] : L.defaultDesc;
+        document.title = title;
+        window.__dsShareMeta(title, description, lang);
+
+        var canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        canonical.href = location.origin + "/";
+        document.head.appendChild(canonical);
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="ds-skip" href="#main"><T zh="跳到主要内容" en="Skip to content" /></a>
+    <TopBar />
+    <main id="main"><slot /></main>
+    <Footer />
+
+    <script is:inline define:vars={{ uiStrings, hostTitles, wechatId }}>
+      (function () {
+        var d = document.documentElement;
+        var langBtn = document.getElementById("lang-toggle");
+        var themeGroup = document.getElementById("theme-group");
+        var themeBtns = document.querySelectorAll("[data-theme-set]");
+        var copyBtn = document.getElementById("wechat-copy");
+        var copyTimer = null;
+        var media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+        function lang() {
+          return d.getAttribute("data-lang") === "en" ? "en" : "zh";
+        }
+        function mode() {
+          var value = d.getAttribute("data-theme-mode");
+          return value === "light" || value === "dark" ? value : "system";
+        }
+        function applyTheme(value) {
+          var dark = value === "system" ? !!(media && media.matches) : value === "dark";
+          d.setAttribute("data-theme-mode", value);
+          d.setAttribute("data-theme", dark ? "dark" : "light");
+        }
+
+        function renderTheme() {
+          var current = mode();
+          for (var i = 0; i < themeBtns.length; i++) {
+            var btn = themeBtns[i];
+            var isCurrent = btn.getAttribute("data-theme-set") === current;
+            btn.setAttribute("aria-pressed", isCurrent ? "true" : "false");
+          }
+          if (themeGroup) themeGroup.setAttribute("aria-label", uiStrings[lang()].themeAria);
+        }
+
+        function renderLang() {
+          if (!langBtn) return;
+          var L = uiStrings[lang()];
+          langBtn.textContent = L.langLabel;
+          langBtn.setAttribute("lang", lang() === "zh" ? "en" : "zh-CN");
+          langBtn.setAttribute("aria-label", L.langAria);
+        }
+
+        function renderCopy() {
+          if (copyBtn) copyBtn.textContent = uiStrings[lang()].copy;
+        }
+
+        function renderTitle() {
+          var L = uiStrings[lang()];
+          var host = d.getAttribute("data-host") || "";
+          var meta = hostTitles[host];
+          var title = meta ? meta[lang()] : L.defaultTitle;
+          var description = meta ? meta[lang() + "Desc"] : L.defaultDesc;
+          document.title = title;
+          if (window.__dsShareMeta) window.__dsShareMeta(title, description, lang());
+        }
+
+        // clipboards are unavailable on plain http, so fall back to execCommand
+        function fallbackCopy(text) {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.top = "-1000px";
+          ta.style.left = "-1000px";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            ta.setSelectionRange(0, ta.value.length);
+          } catch (e) {}
+          var ok = false;
+          try {
+            ok = document.execCommand("copy");
+          } catch (e) {
+            ok = false;
+          }
+          document.body.removeChild(ta);
+          return ok;
+        }
+
+        function copyText(text, onDone) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(
+              function () {
+                onDone(true);
+              },
+              function () {
+                onDone(fallbackCopy(text));
+              },
+            );
+          } else {
+            onDone(fallbackCopy(text));
+          }
+        }
+
+        for (var t = 0; t < themeBtns.length; t++) {
+          themeBtns[t].addEventListener("click", function () {
+            var value = this.getAttribute("data-theme-set");
+            applyTheme(value);
+            try {
+              localStorage.setItem("theme", value);
+            } catch (e) {}
+            renderTheme();
+          });
+        }
+
+        if (media) {
+          var onSystemChange = function () {
+            if (mode() === "system") applyTheme("system");
+          };
+          if (media.addEventListener) media.addEventListener("change", onSystemChange);
+          else if (media.addListener) media.addListener(onSystemChange);
+        }
+
+        if (langBtn) {
+          langBtn.addEventListener("click", function () {
+            var next = lang() === "zh" ? "en" : "zh";
+            d.setAttribute("data-lang", next);
+            d.setAttribute("lang", next === "zh" ? "zh-CN" : "en");
+            try {
+              localStorage.setItem("lang", next);
+            } catch (e) {}
+            renderLang();
+            renderTheme();
+            renderCopy();
+            renderTitle();
+          });
+        }
+
+        if (copyBtn) {
+          copyBtn.addEventListener("click", function () {
+            var value = copyBtn.getAttribute("data-copy") || wechatId;
+            copyText(value, function (ok) {
+              copyBtn.textContent = ok ? uiStrings[lang()].copied : uiStrings[lang()].copyFailed;
+              if (copyTimer) clearTimeout(copyTimer);
+              copyTimer = setTimeout(function () {
+                copyBtn.textContent = uiStrings[lang()].copy;
+              }, 2000);
+            });
+          });
+        }
+
+        renderTheme();
+        renderLang();
+        renderCopy();
+      })();
+    </script>
+  </body>
+</html>

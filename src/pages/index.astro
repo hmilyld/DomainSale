@@ -1,0 +1,78 @@
+---
+import Base from "../layouts/Base.astro";
+import Spotlight from "../components/Spotlight.astro";
+import DomainList from "../components/DomainList.astro";
+import Contact from "../components/Contact.astro";
+import { displayHost, domains } from "../data/domains";
+import { site } from "../data/site";
+
+const hostCss = [
+  ...domains.map(
+    (domain) =>
+      `html[data-host="${domain.host}"] .ds-spotlight[data-spotlight="${domain.host}"]{display:block}`,
+  ),
+  ...domains.map((domain) => `html[data-host="${domain.host}"] .ds-row[data-row="${domain.host}"]{display:none}`),
+].join("");
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: site.brand,
+      alternateName: "Domains for sale",
+      description: "一组在售域名，价格可议。",
+      inLanguage: ["zh-CN", "en"],
+    },
+    {
+      "@type": "Organization",
+      name: site.brand,
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: site.email,
+        availableLanguage: ["zh-CN", "en"],
+      },
+    },
+    {
+      "@type": "ItemList",
+      name: "Domains for sale",
+      numberOfItems: domains.length,
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      itemListElement: domains.map((domain, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Product",
+          name: displayHost(domain),
+          category: domain.category,
+          keywords: [...domain.zh.tags, ...domain.en.tags].join(", "),
+          url: `https://${domain.host}/`,
+          ...(domain.price
+            ? {
+                offers: {
+                  "@type": "Offer",
+                  price: domain.price.amount,
+                  priceCurrency: domain.price.currency,
+                  availability: "https://schema.org/InStock",
+                  url: `https://${domain.host}/`,
+                },
+              }
+            : {}),
+        },
+      })),
+    },
+  ],
+};
+---
+
+<Base>
+  <style is:inline set:html={hostCss}></style>
+
+  {domains.map((domain) => <Spotlight domain={domain} />)}
+
+  <DomainList />
+  <Contact />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+</Base>

@@ -1,0 +1,14 @@
+---
+import { site, t } from "../data/site";
+import T from "./T.astro";
+---
+
+<footer class="ds-footer">
+  <div class="ds-wrap ds-footer__inner">
+    <p class="ds-brand ds-brand--sm">
+      <span class="ds-brand__mark" aria-hidden="true"></span>{site.brand}
+    </p>
+    <p class="ds-footer__note"><T zh={t.footerNote.zh} en={t.footerNote.en} /></p>
+    <p class="ds-footer__copy">© {site.year}</p>
+  </div>
+</footer>

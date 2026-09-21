@@ -1,0 +1,30 @@
+---
+import { site } from "../data/site";
+import { domains } from "../data/domains";
+import T from "./T.astro";
+
+const count = domains.length;
+---
+
+<header class="ds-topbar">
+  <div class="ds-wrap ds-topbar__inner">
+    <a class="ds-brand" href="/">
+      <span class="ds-brand__mark" aria-hidden="true"></span>{site.brand}
+    </a>
+    <div class="ds-topbar__right">
+      <span class="ds-topbar__count"><T zh={`${count} 个域名在售`} en={`${count} domains for sale`} /></span>
+      <button id="lang-toggle" class="ds-toggle" type="button" lang="en" aria-label="Switch to English">English</button>
+      <div id="theme-group" class="ds-seg" role="group" aria-label="主题">
+        <button class="ds-seg__btn" type="button" data-theme-set="system" aria-pressed="false">
+          <T zh="系统" en="System" />
+        </button>
+        <button class="ds-seg__btn" type="button" data-theme-set="light" aria-pressed="false">
+          <T zh="浅色" en="Light" />
+        </button>
+        <button class="ds-seg__btn" type="button" data-theme-set="dark" aria-pressed="false">
+          <T zh="深色" en="Dark" />
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

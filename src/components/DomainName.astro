@@ -1,0 +1,13 @@
+---
+import { displayLabel, displayTld } from "../data/domains";
+
+interface Props {
+  label: string;
+  tld: string;
+  variant?: "display" | "row";
+}
+
+const { label, tld, variant = "display" } = Astro.props;
+---
+
+<span class:list={["ds-domain", `ds-domain--${variant}`]}><span class="ds-domain__name">{displayLabel(label)}</span><span class="ds-domain__dot">.</span><span class="ds-domain__tld">{displayTld(tld)}</span></span>
